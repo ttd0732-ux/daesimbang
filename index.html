@@ -1190,24 +1190,6 @@ async function startCombined(prefix){
   if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){
     if(st)st.textContent="이 화면에서는 마이크를 쓸 수 없습니다. 크롬 브라우저에서 파일을 직접 열어주세요. Muse 파일 미리보기에서는 마이크 권한이 안 될 수 있습니다.";
   }
-  if(typeof MediaRecorder!=="undefined"&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
-    try{
-      s.stream=await navigator.mediaDevices.getUserMedia({audio:true});
-      s.recorder=new MediaRecorder(s.stream);
-      s.recorder.ondataavailable=function(ev){if(ev.data&&ev.data.size)s.chunks.push(ev.data);};
-      s.recorder.onstop=function(){
-        const blob=new Blob(s.chunks,{type:s.recorder.mimeType||"audio/webm"});
-        if(s.blobUrl)URL.revokeObjectURL(s.blobUrl);
-        s.blobUrl=URL.createObjectURL(blob);
-        const audio=document.getElementById("combAudio-"+prefix); if(audio)audio.src=s.blobUrl;
-        if(res)res.style.display="block";
-        if(s.stream){s.stream.getTracks().forEach(function(tr){tr.stop();}); s.stream=null;}
-      };
-      s.recorder.start(); s.recOk=true;
-    }catch(e){
-      if(st)st.textContent="마이크 권한이 거부되었습니다. 브라우저 설정에서 마이크 권한을 허용한 뒤 다시 시도해 주세요. 크롬 브라우저에서 파일을 직접 열어보세요.";
-    }
-  }
   if(window.SpeechRecognition||window.webkitSpeechRecognition){
     try{
       const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -1237,6 +1219,26 @@ async function startCombined(prefix){
       recog.start(); s.transOk=true;
     }catch(e){}
   }
+  if(!s.transOk){
+  if(typeof MediaRecorder!=="undefined"&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
+    try{
+      s.stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      s.recorder=new MediaRecorder(s.stream);
+      s.recorder.ondataavailable=function(ev){if(ev.data&&ev.data.size)s.chunks.push(ev.data);};
+      s.recorder.onstop=function(){
+        const blob=new Blob(s.chunks,{type:s.recorder.mimeType||"audio/webm"});
+        if(s.blobUrl)URL.revokeObjectURL(s.blobUrl);
+        s.blobUrl=URL.createObjectURL(blob);
+        const audio=document.getElementById("combAudio-"+prefix); if(audio)audio.src=s.blobUrl;
+        if(res)res.style.display="block";
+        if(s.stream){s.stream.getTracks().forEach(function(tr){tr.stop();}); s.stream=null;}
+      };
+      s.recorder.start(); s.recOk=true;
+    }catch(e){
+      if(st)st.textContent="마이크 권한이 거부되었습니다. 브라우저 설정에서 마이크 권한을 허용한 뒤 다시 시도해 주세요. 크롬 브라우저에서 파일을 직접 열어보세요.";
+    }
+  }
+  }
   const startTs=Date.now();
   s.timer=setInterval(function(){const el=document.getElementById("combTime-"+prefix); if(el)el.textContent=fmtTime(Math.floor((Date.now()-startTs)/1000));},500);
   setTimeout(function(){ if(s.active&&s.transOk&&!s.recogStarted&&st)st.textContent="음성 변환이 연결되지 않았습니다. 녹음 정지 후 다시 녹음하기를 눌러주세요. 그래도 안 되면 크롬을 완전히 껐다 켜고 다시 해 보세요."; },4000);
@@ -1248,7 +1250,7 @@ async function startCombined(prefix){
   }
   const bs=document.getElementById("combStart-"+prefix); if(bs)bs.disabled=true;
   const be=document.getElementById("combStop-"+prefix); if(be)be.disabled=false;
-  if(st)st.textContent=(s.recOk&&s.transOk)?"녹음·변환 중입니다. 말씀하시면 실시간으로 글로 표시됩니다.":(s.recOk?"녹음은 되고 있지만, 음성 변환이 시작되지 않았습니다. 이 브라우저에서는 변환이 안 될 수 있습니다. 크롬에서 열어주세요.":"녹음(오디오)은 안 되지만, 변환은 진행 중입니다. 말씀하시면 실시간으로 글로 표시됩니다.");
+  if(st)st.textContent=(s.recOk&&s.transOk)?"녹음·변환 중입니다. 말씀하시면 실시간으로 글로 표시됩니다.":(s.recOk?"녹음은 되고 있지만, 음성 변환이 시작되지 않았습니다. 이 브라우저에서는 변환이 안 될 수 있습니다. 크롬에서 열어주세요.":"음성 변환 중입니다. 말씀하시면 실시간으로 글로 표시됩니다. (이 모드에서는 오디오 저장은 안 됩니다.)");
 }
 function stopCombined(prefix, silent){
   const s=comb[prefix]; if(!s)return;
