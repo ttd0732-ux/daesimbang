@@ -1185,15 +1185,34 @@ function renderCombinedArea(prefix, stepNum){
 async function startCombined(prefix){
   const st=document.getElementById("combStatus-"+prefix); if(st)st.textContent="마이크를 켜고 있습니다. 허용 팝업이 뜨면 허용을 누르세요.";
   const res=document.getElementById("combResult-"+prefix); if(res)res.style.display="none";
-  const s={active:true, chunks:[], final:"", stream:null, recorder:null, timer:null, blobUrl:null, recog:null, recOk:false, transOk:false, transFatal:false};
+  const s={active:true, chunks:[], final:"", stream:null, recorder:null, timer:null, blobUrl:null, recog:null, recOk:false, transOk:false, transFatal:false, recogStarted:false};
   comb[prefix]=s;
   if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){
     if(st)st.textContent="이 화면에서는 마이크를 쓸 수 없습니다. 크롬 브라우저에서 파일을 직접 열어주세요. Muse 파일 미리보기에서는 마이크 권한이 안 될 수 있습니다.";
   }
+  if(typeof MediaRecorder!=="undefined"&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
+    try{
+      s.stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      s.recorder=new MediaRecorder(s.stream);
+      s.recorder.ondataavailable=function(ev){if(ev.data&&ev.data.size)s.chunks.push(ev.data);};
+      s.recorder.onstop=function(){
+        const blob=new Blob(s.chunks,{type:s.recorder.mimeType||"audio/webm"});
+        if(s.blobUrl)URL.revokeObjectURL(s.blobUrl);
+        s.blobUrl=URL.createObjectURL(blob);
+        const audio=document.getElementById("combAudio-"+prefix); if(audio)audio.src=s.blobUrl;
+        if(res)res.style.display="block";
+        if(s.stream){s.stream.getTracks().forEach(function(tr){tr.stop();}); s.stream=null;}
+      };
+      s.recorder.start(); s.recOk=true;
+    }catch(e){
+      if(st)st.textContent="마이크 권한이 거부되었습니다. 브라우저 설정에서 마이크 권한을 허용한 뒤 다시 시도해 주세요. 크롬 브라우저에서 파일을 직접 열어보세요.";
+    }
+  }
   if(window.SpeechRecognition||window.webkitSpeechRecognition){
     try{
       const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-      const recog=new SR(); recog.lang="ko-KR"; recog.continuous=true; recog.interimResults=true; s.recog=recog;
+      const recog=new SR(); recog.lang="ko-KR"; recog.continuous=false; recog.interimResults=true; s.recog=recog;
+      recog.onstart=function(){ s.recogStarted=true; if(st)st.textContent="음성 변환이 연결됐습니다. 말씀하시면 바로 글로 뜹니다."; };
       recog.onresult=function(ev){
         let interim="";
         for(let i=ev.resultIndex;i<ev.results.length;i++){
@@ -1218,26 +1237,9 @@ async function startCombined(prefix){
       recog.start(); s.transOk=true;
     }catch(e){}
   }
-  if(typeof MediaRecorder!=="undefined"&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
-    try{
-      s.stream=await navigator.mediaDevices.getUserMedia({audio:true});
-      s.recorder=new MediaRecorder(s.stream);
-      s.recorder.ondataavailable=function(ev){if(ev.data&&ev.data.size)s.chunks.push(ev.data);};
-      s.recorder.onstop=function(){
-        const blob=new Blob(s.chunks,{type:s.recorder.mimeType||"audio/webm"});
-        if(s.blobUrl)URL.revokeObjectURL(s.blobUrl);
-        s.blobUrl=URL.createObjectURL(blob);
-        const audio=document.getElementById("combAudio-"+prefix); if(audio)audio.src=s.blobUrl;
-        if(res)res.style.display="block";
-        if(s.stream){s.stream.getTracks().forEach(function(tr){tr.stop();}); s.stream=null;}
-      };
-      s.recorder.start(); s.recOk=true;
-    }catch(e){
-      if(st)st.textContent="마이크 권한이 거부되었습니다. 브라우저 설정에서 마이크 권한을 허용한 뒤 다시 시도해 주세요. 크롬 브라우저에서 파일을 직접 열어보세요.";
-    }
-  }
   const startTs=Date.now();
   s.timer=setInterval(function(){const el=document.getElementById("combTime-"+prefix); if(el)el.textContent=fmtTime(Math.floor((Date.now()-startTs)/1000));},500);
+  setTimeout(function(){ if(s.active&&s.transOk&&!s.recogStarted&&st)st.textContent="음성 변환이 연결되지 않았습니다. 녹음 정지 후 다시 녹음하기를 눌러주세요. 그래도 안 되면 크롬을 완전히 껐다 켜고 다시 해 보세요."; },4000);
   if(!s.recOk&&!s.transOk){
     if(st&&!st.textContent)st.textContent="녹음·변환이 시작되지 않았습니다. 마이크 권한을 허용하고, 파일이 아니라 웹사이트 주소(https)로 열어 다시 시도해 주세요.";
     const bs2=document.getElementById("combStart-"+prefix); if(bs2)bs2.disabled=false;
