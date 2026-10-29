@@ -1186,7 +1186,7 @@ function renderCombinedArea(prefix, stepNum){
   area.innerHTML=fileWarn+transWarn+'<p style="font-size:14px;margin-bottom:8px"><b>녹음 ('+code+')</b> — 위에서 글로변환 저장 또는 오디오소리로만저장 중 하나를 고른 뒤, 녹음시작을 누르세요. 끝낼 때는 녹음중지를 누르면 다운로드 버튼이 나타납니다. 변환 시 음성이 음성 인식 업체 서버로 보내질 수 있어, 버튼을 눌렀을 때만 변환합니다. 정확도는 완벽하지 않으니 이름·숫자는 직접 확인하고 고치세요. 다운로드는 변환텍스트만 됩니다. 카톡 안 브라우저나 삼성 인터넷에서는 음성 변환이 안 될 수 있습니다. 그럴 때는 크롬 브라우저에서 웹사이트 주소로 직접 열어주세요.</p>'+guideHtml
   +'<div class="btnrow"><span style="font-size:14px;font-weight:800;align-self:center">둘중 하나를 선택하세요</span><span id="modeConvertLabel-'+prefix+'" class="modeLabel on" onclick="setRecMode(\''+prefix+'\',\'convert\')">글로변환 저장</span><label class="recSwitch"><input type="checkbox" id="recSwitch-'+prefix+'" onchange="setRecMode(\''+prefix+'\',this.checked?\'audio\':\'convert\')"><span class="slider"></span></label><span id="modeAudioLabel-'+prefix+'" class="modeLabel" onclick="setRecMode(\''+prefix+'\',\'audio\')">오디오소리로만저장</span></div>'
   +'<div class="btnrow"><button id="recStart-'+prefix+'" onclick="startRec(\''+prefix+'\')">녹음시작</button><button id="recStop-'+prefix+'" onclick="stopRec(\''+prefix+'\')" disabled>녹음중지</button><span id="combTime-'+prefix+'" style="font-weight:800;align-self:center">00:00</span></div>'
-  +'<div class="btnrow" id="recDlRow-'+prefix+'" style="display:none"><button id="dlAudio-'+prefix+'" onclick="downloadAudioOnly(\''+prefix+'\')">오디오소리다운</button><button id="dlText-'+prefix+'" onclick="downloadCombinedTranscript(\''+prefix+'\')">글로 변환다운</button><button class="ghost" onclick="deleteCombined(\''+prefix+'\')">기록 지우기</button><span style="font-size:13px;align-self:center">골랐던 방식만 다운로드됩니다</span></div>'
+  +'<div class="btnrow" id="recDlRow-'+prefix+'" style="display:none"><button id="dlAudio-'+prefix+'" onclick="downloadAudioOnly(\''+prefix+'\')">오디오소리다운</button><button id="dlText-'+prefix+'" onclick="downloadCombinedTranscript(\''+prefix+'\')">글로 변환다운</button><button class="ghost" onclick="deleteCombined(\''+prefix+'\')">기록 지우기</button></div>'
   +'<div id="combStatus-'+prefix+'" class="saved"></div>'
   +'<div id="combResult-'+prefix+'" style="display:none;margin-top:10px"><audio id="combAudio-'+prefix+'" controls style="width:100%"></audio></div>'
   +'<textarea id="combTranscript-'+prefix+'" placeholder="녹음하면 여기에 자동으로 글로 변환됩니다. 변환이 끝난 뒤 직접 고칠 수 있습니다." oninput="saveVisitField(\'transcript'+prefix+'\',this.value)"></textarea>';
@@ -1331,9 +1331,10 @@ function stopRec(prefix){
   const ta=document.getElementById("combTranscript-"+prefix);
   const hasText=!!(ta&&ta.value);
   const hasAudio=!!(audioOnly[prefix]&&audioOnly[prefix].blobUrl);
-  const da=document.getElementById("dlAudio-"+prefix); if(da)da.disabled=!hasAudio;
-  const dt=document.getElementById("dlText-"+prefix); if(dt)dt.disabled=!hasText;
-  const row=document.getElementById("recDlRow-"+prefix); if(row)row.style.display="flex";
+  const da=document.getElementById("dlAudio-"+prefix); if(da)da.style.display=(mode==="audio"&&hasAudio)?"":"none";
+  const dt=document.getElementById("dlText-"+prefix); if(dt)dt.style.display=(mode==="convert"&&hasText)?"":"none";
+  const hasDl=(mode==="audio"&&hasAudio)||(mode==="convert"&&hasText);
+  const row=document.getElementById("recDlRow-"+prefix); if(row)row.style.display=hasDl?"flex":"none";
 }
 async function startAudioOnly(prefix){
   const st=document.getElementById("combStatus-"+prefix);
