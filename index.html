@@ -54,13 +54,13 @@ header .free{display:inline-block;margin-top:14px;border:1px solid #f0b429;color
 .btnrow button.green{background:#2e7d32;border-color:#2e7d32}
 .btnrow button.red{background:#c1272d;border-color:#c1272d}
 .btnrow button.purple{background:#6a4c93;border-color:#6a4c93}
-.recSwitch{position:relative;display:inline-block;width:56px;height:30px;flex:0 0 auto;align-self:center}
+.recSwitch{position:relative;display:inline-block;width:48px;height:28px;flex:0 0 auto;align-self:center}
 .recSwitch input{display:none}
 .recSwitch .slider{position:absolute;inset:0;background:#f0b429;border-radius:30px;cursor:pointer}
-.recSwitch .slider:before{content:"";position:absolute;width:24px;height:24px;left:3px;top:3px;background:#1e3a5f;border-radius:50%;transition:.2s}
-.recSwitch input:checked + .slider:before{transform:translateX(26px)}
+.recSwitch .slider:before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#1e3a5f;border-radius:50%;transition:.2s}
+.recSwitch input:checked + .slider:before{transform:translateX(20px)}
 .recSwitch input:disabled + .slider{opacity:.5;cursor:default}
-.modeLabel{font-size:14px;font-weight:700;color:#8a97a8;align-self:center;cursor:pointer}
+.modeLabel{font-size:13px;font-weight:700;color:#8a97a8;align-self:center;cursor:pointer}
 .modeLabel.on{color:#1e3a5f;font-weight:900}
 .back{background:transparent;border:0;color:#1e3a5f;font-weight:800;font-size:15px;cursor:pointer;margin-bottom:14px}
 .checks{list-style:none}
@@ -1186,9 +1186,9 @@ function renderCombinedArea(prefix, stepNum){
   const fileWarn=(window.location.protocol==="file:")?'<div class="note" style="border-left-color:#c1272d;background:#fdecea"><b>지금 파일로 열려 있어 마이크·변환이 안 될 수 있습니다.</b> 마이크 설정이 켜져 있어도, 파일 주소에서는 크롬이 마이크를 막습니다. 웹사이트 주소(https)로 열어야 녹음·변환이 됩니다.</div>':'';
   const transWarn=(!hasTrans)?'<div class="note" style="border-left-color:#c1272d;background:#fdecea"><b>이 브라우저에서는 음성 변환이 안 됩니다.</b> 녹음(오디오)은 되지만 글로 변환은 안 됩니다. 변환을 쓰려면 크롬 브라우저에서 웹사이트 주소(https://daesimbang.vercel.app)로 열어주세요.</div>':'';
   const guideHtml='<details style="background:#fff8e1;border:1px solid #e3ddc9;border-left:4px solid #f0b429;border-radius:8px;padding:10px 12px;margin:10px 0;font-size:14px;line-height:1.7"><summary style="font-weight:800;cursor:pointer">마이크·변환이 안 될 때 확인하기 (눌러서 보기)</summary><ol style="margin:8px 0 0 18px;padding:0"><li>카톡이나 삼성 인터넷으로 열지 마세요. 크롬 앱을 직접 열고 https://daesimbang.vercel.app 로 들어가세요.</li><li>크롬 오른쪽 위 점 3개 메뉴 → 설정 → 사이트 설정 → 마이크를 누르세요. 대심방 주소가 허용으로 돼 있어야 합니다. 차단이면 눌러서 허용으로 바꾸세요.</li><li>핸드폰 설정 → 애플리케이션 → Chrome → 권한 → 마이크도 허용으로 돼 있어야 합니다. 사이트 허용과 핸드폰 앱 허용은 따로입니다. 둘 다 켜져 있어야 합니다.</li><li>글 변환은 크롬에서만 됩니다. 삼성 인터넷이나 카톡 안에서는 녹음은 돼도 글 변환은 안 될 수 있습니다.</li><li>그래도 안 되면 녹음하기를 누른 뒤 상태 문구에 뜨는 문구를 확인하세요. 연결됐습니다인지, 연결되지 않았습니다인지가 단서가 됩니다.</li></ol></details>';
-  area.innerHTML=fileWarn+transWarn+'<p style="font-size:14px;margin-bottom:8px"><b>녹음 ('+code+')</b> — 위에서 글로변환 저장 또는 오디오소리로만저장 중 하나를 고른 뒤, 녹음시작을 누르세요. 끝낼 때는 녹음중지를 누르면 다운로드 버튼이 나타납니다. 변환 시 음성이 음성 인식 업체 서버로 보내질 수 있어, 버튼을 눌렀을 때만 변환합니다. 정확도는 완벽하지 않으니 이름·숫자는 직접 확인하고 고치세요. 다운로드는 변환텍스트만 됩니다. 카톡 안 브라우저나 삼성 인터넷에서는 음성 변환이 안 될 수 있습니다. 그럴 때는 크롬 브라우저에서 웹사이트 주소로 직접 열어주세요.</p>'+guideHtml
+  area.innerHTML=fileWarn+transWarn+'<p style="font-size:14px;margin-bottom:8px"><b>녹음 ('+code+')</b> — 위에서 글만 저장 또는 소리만 저장 중 하나를 고른 뒤, 녹음시작을 누르세요. 끝낼 때는 녹음중지를 누르면 다운로드 버튼이 나타납니다. 변환 시 음성이 음성 인식 업체 서버로 보내질 수 있어, 버튼을 눌렀을 때만 변환합니다. 정확도는 완벽하지 않으니 이름·숫자는 직접 확인하고 고치세요. 다운로드는 변환텍스트만 됩니다. 카톡 안 브라우저나 삼성 인터넷에서는 음성 변환이 안 될 수 있습니다. 그럴 때는 크롬 브라우저에서 웹사이트 주소로 직접 열어주세요.</p>'+guideHtml
   +'<div style="font-size:14px;font-weight:800;margin:14px 0 0">둘중 하나를 선택하세요</div>'
-  +'<div class="btnrow" style="margin-top:6px"><span id="modeConvertLabel-'+prefix+'" class="modeLabel on" onclick="setRecMode(\''+prefix+'\',\'convert\')">글로변환 저장</span><label class="recSwitch"><input type="checkbox" id="recSwitch-'+prefix+'" onchange="setRecMode(\''+prefix+'\',this.checked?\'audio\':\'convert\')"><span class="slider"></span></label><span id="modeAudioLabel-'+prefix+'" class="modeLabel" onclick="setRecMode(\''+prefix+'\',\'audio\')">오디오소리로만저장</span></div>'
+  +'<div class="btnrow" style="margin-top:6px"><span id="modeConvertLabel-'+prefix+'" class="modeLabel on" onclick="setRecMode(\''+prefix+'\',\'convert\')">글만 저장</span><label class="recSwitch"><input type="checkbox" id="recSwitch-'+prefix+'" onchange="setRecMode(\''+prefix+'\',this.checked?\'audio\':\'convert\')"><span class="slider"></span></label><span id="modeAudioLabel-'+prefix+'" class="modeLabel" onclick="setRecMode(\''+prefix+'\',\'audio\')">소리만 저장</span></div>'
   +'<div class="btnrow"><button class="green" id="recStart-'+prefix+'" onclick="startRec(\''+prefix+'\')">녹음시작</button><button class="red" id="recStop-'+prefix+'" onclick="stopRec(\''+prefix+'\')" disabled>녹음중지</button><span id="combTime-'+prefix+'" style="font-weight:800;align-self:center">00:00</span></div>'
   +'<div class="btnrow" id="recDlRow-'+prefix+'" style="display:none"><button class="purple" id="dlAudio-'+prefix+'" onclick="downloadAudioOnly(\''+prefix+'\')">오디오소리다운</button><button id="dlText-'+prefix+'" onclick="downloadCombinedTranscript(\''+prefix+'\')">글로 변환다운</button><button class="danger" onclick="deleteCombined(\''+prefix+'\')">기록 지우기</button></div>'
   +'<div id="combStatus-'+prefix+'" class="saved"></div>'
