@@ -94,6 +94,7 @@ footer b{color:#1e3a5f}
 <div id="detailView" style="display:none"></div>
 </main>
 <footer><b>앱 문의) shs목사 · ttd0732@hanmail.net</b><br>대심방 · 상황별 심방 말씀과 기도</footer>
+<script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
 <script>
 // 12대 대분류 (새가족·장례 제외, 순수 대심방 12대 영역)
 const GROUPS=[
@@ -1391,13 +1392,54 @@ function stopAudioOnly(prefix, silent){
   const st=document.getElementById("combStatus-"+prefix);
   if(st&&!silent)st.textContent="오디오 녹음이 끝났습니다. 아래에서 재생하거나 오디오 다운로드로 저장하세요. (글 변환은 안 됩니다.)";
 }
-function downloadAudioOnly(prefix){
-  const s=audioOnly[prefix]; if(!s||!s.blobUrl){
-    const st=document.getElementById("combStatus-"+prefix); if(st)st.textContent="저장된 오디오가 없습니다. 오디오만 녹음을 먼저 해 주세요.";
+async function downloadAudioOnly(prefix){
+  const s=audioOnly[prefix];
+  const st=document.getElementById("combStatus-"+prefix);
+  if(!s||!s.blobUrl){
+    if(st)st.textContent="저장된 오디오가 없습니다. 오디오만 녹음을 먼저 해 주세요.";
     return;
   }
   const code=verseCode(current,curVerseIdx)+"-"+((prefix==="C2")?2:3);
-  const a=document.createElement("a"); a.href=s.blobUrl; a.download=code+"_오디오.webm"; a.click();
+  function saveWebm(){
+    const a=document.createElement("a"); a.href=s.blobUrl; a.download=code+"_오디오.webm"; a.click();
+  }
+  try{
+    if(!(window.lamejs&&window.AudioContext)){
+      if(st)st.textContent="mp3 변환기를 불러오지 못해 webm으로 저장합니다.";
+      saveWebm(); return;
+    }
+    if(st)st.textContent="mp3으로 변환 중입니다. 잠시만 기다려주세요.";
+    const buf=await fetch(s.blobUrl).then(function(r){return r.arrayBuffer();});
+    const ctx=new window.AudioContext();
+    const decoded=await ctx.decodeAudioData(buf);
+    const ch=decoded.numberOfChannels;
+    const sr=decoded.sampleRate;
+    const encoder=new lamejs.Mp3Encoder(ch, sr, 128);
+    function toInt16(f32){
+      const out=new Int16Array(f32.length);
+      for(let i=0;i<f32.length;i++){let v=f32[i]; if(v>1)v=1; if(v<-1)v=-1; out[i]=v<0?v*32768:v*32767;}
+      return out;
+    }
+    const l16=toInt16(decoded.getChannelData(0));
+    const r16=ch>1?toInt16(decoded.getChannelData(1)):l16;
+    const mp3data=[];
+    const block=1152;
+    for(let i=0;i<l16.length;i+=block){
+      const mp3buf=encoder.encodeBuffer(l16.subarray(i,i+block), r16.subarray(i,i+block));
+      if(mp3buf.length)mp3data.push(mp3buf);
+    }
+    const end=encoder.flush();
+    if(end.length)mp3data.push(end);
+    const mp3blob=new Blob(mp3data,{type:"audio/mpeg"});
+    const url=URL.createObjectURL(mp3blob);
+    const a=document.createElement("a"); a.href=url; a.download=code+"_오디오.mp3"; a.click();
+    setTimeout(function(){URL.revokeObjectURL(url);},5000);
+    if(st)st.textContent="mp3 파일로 저장했습니다. 노트북에서 바로 재생됩니다.";
+    try{ctx.close();}catch(e){}
+  }catch(e){
+    if(st)st.textContent="mp3 변환에 실패해 webm으로 저장합니다.";
+    saveWebm();
+  }
 }
 function downloadCombinedTranscript(prefix){
   const ta=document.getElementById("combTranscript-"+prefix); if(!ta)return;
