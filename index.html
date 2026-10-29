@@ -1193,7 +1193,7 @@ function renderCombinedArea(prefix, stepNum){
   +'<div class="btnrow"><button class="green" id="recStart-'+prefix+'" onclick="startRec(\''+prefix+'\')">녹음시작</button><button class="red" id="recStop-'+prefix+'" onclick="stopRec(\''+prefix+'\')" disabled>녹음중지</button><span id="combTime-'+prefix+'" style="font-weight:800;align-self:center">00:00</span></div>'
   +'<div class="btnrow" id="recDlRow-'+prefix+'" style="display:none"><button class="purple" id="dlAudio-'+prefix+'" onclick="downloadAudioOnly(\''+prefix+'\')">오디오소리다운</button><button id="dlText-'+prefix+'" onclick="downloadCombinedTranscript(\''+prefix+'\')">글로 변환다운</button><button class="danger" onclick="deleteCombined(\''+prefix+'\')">기록 지우기</button></div>'
   +'<div id="combStatus-'+prefix+'" class="saved"></div>'
-  +'<div id="combResult-'+prefix+'" style="display:none;margin-top:10px"><audio id="combAudio-'+prefix+'" controls style="width:100%"></audio></div>'
+  +'<div id="combResult-'+prefix+'" style="display:none;margin-top:10px"><audio id="combAudio-'+prefix+'" controls controlsList="nodownload" oncontextmenu="return false" style="width:100%"></audio><p style="font-size:13px;color:#4a5a70">소리 저장은 아래 보라색 오디오소리다운 버튼으로 하세요. 재생기를 오른쪽 클릭해서 저장하면 .weba로 저장돼 노트북에서 바로 안 들릴 수 있습니다.</p></div>'
   +'<textarea id="combTranscript-'+prefix+'" placeholder="녹음하면 여기에 자동으로 글로 변환됩니다. 변환이 끝난 뒤 직접 고칠 수 있습니다." oninput="saveVisitField(\'transcript'+prefix+'\',this.value)"></textarea>';
 
   const v=loadVisit(); const ta=document.getElementById("combTranscript-"+prefix);
