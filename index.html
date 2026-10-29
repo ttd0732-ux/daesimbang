@@ -1175,13 +1175,13 @@ function renderCombinedArea(prefix, stepNum){
   const fileWarn=(window.location.protocol==="file:")?'<div class="note" style="border-left-color:#c1272d;background:#fdecea"><b>지금 파일로 열려 있어 마이크·변환이 안 될 수 있습니다.</b> 마이크 설정이 켜져 있어도, 파일 주소에서는 크롬이 마이크를 막습니다. 웹사이트 주소(https)로 열어야 녹음·변환이 됩니다.</div>':'';
   const transWarn=(!hasTrans)?'<div class="note" style="border-left-color:#c1272d;background:#fdecea"><b>이 브라우저에서는 음성 변환이 안 됩니다.</b> 녹음(오디오)은 되지만 글로 변환은 안 됩니다. 변환을 쓰려면 크롬 브라우저에서 웹사이트 주소(https://daesimbang.vercel.app)로 열어주세요.</div>':'';
   const guideHtml='<details style="background:#fff8e1;border:1px solid #e3ddc9;border-left:4px solid #f0b429;border-radius:8px;padding:10px 12px;margin:10px 0;font-size:14px;line-height:1.7"><summary style="font-weight:800;cursor:pointer">마이크·변환이 안 될 때 확인하기 (눌러서 보기)</summary><ol style="margin:8px 0 0 18px;padding:0"><li>카톡이나 삼성 인터넷으로 열지 마세요. 크롬 앱을 직접 열고 https://daesimbang.vercel.app 로 들어가세요.</li><li>크롬 오른쪽 위 점 3개 메뉴 → 설정 → 사이트 설정 → 마이크를 누르세요. 대심방 주소가 허용으로 돼 있어야 합니다. 차단이면 눌러서 허용으로 바꾸세요.</li><li>핸드폰 설정 → 애플리케이션 → Chrome → 권한 → 마이크도 허용으로 돼 있어야 합니다. 사이트 허용과 핸드폰 앱 허용은 따로입니다. 둘 다 켜져 있어야 합니다.</li><li>글 변환은 크롬에서만 됩니다. 삼성 인터넷이나 카톡 안에서는 녹음은 돼도 글 변환은 안 될 수 있습니다.</li><li>그래도 안 되면 녹음하기를 누른 뒤 상태 문구에 뜨는 문구를 확인하세요. 연결됐습니다인지, 연결되지 않았습니다인지가 단서가 됩니다.</li></ol></details>';
-  area.innerHTML=fileWarn+transWarn+'<p style="font-size:14px;margin-bottom:8px"><b>녹음하기 ('+code+')</b> — 녹음하면 바로 텍스트로 변환됩니다. 변환 시 음성이 음성 인식 업체 서버로 보내질 수 있어, 버튼을 눌렀을 때만 변환합니다. 정확도는 완벽하지 않으니 이름·숫자는 직접 확인하고 고치세요. 다운로드는 변환텍스트만 됩니다. 카톡 안 브라우저나 삼성 인터넷에서는 음성 변환이 안 될 수 있습니다. 그럴 때는 크롬 브라우저에서 웹사이트 주소로 직접 열어주세요.</p>'+guideHtml
-  +'<div class="btnrow"><button id="combStart-'+prefix+'" onclick="startCombined(\''+prefix+'\')">녹음하기</button><button id="combStop-'+prefix+'" onclick="stopCombined(\''+prefix+'\')" disabled>녹음 정지</button><button class="danger" onclick="deleteCombined(\''+prefix+'\')">녹음 삭제</button><span id="combTime-'+prefix+'" style="font-weight:800;align-self:center">00:00</span></div>'
-  +'<div class="btnrow"><button id="audioStart-'+prefix+'" onclick="startAudioOnly(\''+prefix+'\')">오디오만 녹음</button><button id="audioStop-'+prefix+'" onclick="stopAudioOnly(\''+prefix+'\')" disabled>오디오 정지</button><button id="audioDownload-'+prefix+'" onclick="downloadAudioOnly(\''+prefix+'\')" disabled>오디오 다운로드</button><span style="font-size:13px;align-self:center">글 변환 안 됨, 소리만 저장·재생</span></div>'
+  area.innerHTML=fileWarn+transWarn+'<p style="font-size:14px;margin-bottom:8px"><b>녹음 ('+code+')</b> — 위에서 글로 변환 또는 소리만을 고른 뒤, 녹음 시작을 누르세요. 글로 변환을 고르면 말이 바로 글로 뜹니다. 변환 시 음성이 음성 인식 업체 서버로 보내질 수 있어, 버튼을 눌렀을 때만 변환합니다. 정확도는 완벽하지 않으니 이름·숫자는 직접 확인하고 고치세요. 다운로드는 변환텍스트만 됩니다. 카톡 안 브라우저나 삼성 인터넷에서는 음성 변환이 안 될 수 있습니다. 그럴 때는 크롬 브라우저에서 웹사이트 주소로 직접 열어주세요.</p>'+guideHtml
+  +'<div class="btnrow"><span style="font-size:14px;font-weight:800;align-self:center">무엇으로 저장할까요?</span><button id="modeConvert-'+prefix+'" class="on" onclick="setRecMode(\''+prefix+'\',\'convert\')">글로 변환</button><button id="modeAudio-'+prefix+'" onclick="setRecMode(\''+prefix+'\',\'audio\')">소리만</button><span id="recModeDesc-'+prefix+'" style="font-size:13px;align-self:center">글로 변환해서 저장합니다</span></div>'
+  +'<div class="btnrow"><button id="recToggle-'+prefix+'" onclick="toggleRecord(\''+prefix+'\')">▶ 녹음 시작</button><span id="combTime-'+prefix+'" style="font-weight:800;align-self:center">00:00</span></div>'
+  +'<div class="btnrow" id="recSaveRow-'+prefix+'" style="display:none"><button id="recSave-'+prefix+'" onclick="saveRecord(\''+prefix+'\')">변환텍스트 저장하기</button><button class="danger" onclick="deleteCombined(\''+prefix+'\')">기록 지우기</button></div>'
   +'<div id="combStatus-'+prefix+'" class="saved"></div>'
   +'<div id="combResult-'+prefix+'" style="display:none;margin-top:10px"><audio id="combAudio-'+prefix+'" controls style="width:100%"></audio></div>'
-  +'<textarea id="combTranscript-'+prefix+'" placeholder="녹음하면 여기에 자동으로 글로 변환됩니다. 변환이 끝난 뒤 직접 고칠 수 있습니다." oninput="saveVisitField(\'transcript'+prefix+'\',this.value)"></textarea>'
-  +'<div class="btnrow"><button onclick="downloadCombinedTranscript(\''+prefix+'\')">'+code+' 변환텍스트 다운로드</button></div>';
+  +'<textarea id="combTranscript-'+prefix+'" placeholder="녹음하면 여기에 자동으로 글로 변환됩니다. 변환이 끝난 뒤 직접 고칠 수 있습니다." oninput="saveVisitField(\'transcript'+prefix+'\',this.value)"></textarea>';
 
   const v=loadVisit(); const ta=document.getElementById("combTranscript-"+prefix);
   if(ta&&v["transcript"+prefix])ta.value=v["transcript"+prefix];
@@ -1280,7 +1280,59 @@ function deleteCombined(prefix){
   const tm=document.getElementById("combTime-"+prefix); if(tm)tm.textContent="00:00";
   const ta=document.getElementById("combTranscript-"+prefix); if(ta){ta.value=""; saveVisitField("transcript"+prefix, "");}
   const st=document.getElementById("combStatus-"+prefix); if(st)st.textContent="녹음과 변환텍스트를 삭제했습니다.";
+  recLast[prefix]=null; resetRecUI(prefix);
   const ad=document.getElementById("audioDownload-"+prefix); if(ad)ad.disabled=true;
+}
+const recMode={};
+const recLast={};
+function isRecActive(prefix){
+  return !!((comb[prefix]&&comb[prefix].active)||(audioOnly[prefix]&&audioOnly[prefix].active));
+}
+function setRecMode(prefix, mode){
+  if(isRecActive(prefix))return;
+  recMode[prefix]=mode;
+  const mc=document.getElementById("modeConvert-"+prefix);
+  const ma=document.getElementById("modeAudio-"+prefix);
+  const desc=document.getElementById("recModeDesc-"+prefix);
+  if(mc)mc.className=(mode==="convert")?"on":"";
+  if(ma)ma.className=(mode==="audio")?"on":"";
+  if(desc)desc.textContent=(mode==="audio")?"소리만 저장합니다 (글 변환 안 됨)":"글로 변환해서 저장합니다";
+  const sv=document.getElementById("recSave-"+prefix);
+  if(sv)sv.textContent=(mode==="audio")?"오디오 저장하기":"변환텍스트 저장하기";
+}
+function resetRecUI(prefix){
+  const tg=document.getElementById("recToggle-"+prefix); if(tg)tg.textContent="▶ 녹음 시작";
+  const mc=document.getElementById("modeConvert-"+prefix); if(mc)mc.disabled=false;
+  const ma=document.getElementById("modeAudio-"+prefix); if(ma)ma.disabled=false;
+  const row=document.getElementById("recSaveRow-"+prefix); if(row)row.style.display="none";
+}
+function toggleRecord(prefix){
+  if(isRecActive(prefix)){
+    const mode=recMode[prefix]||"convert";
+    recLast[prefix]=mode;
+    if(mode==="audio"){ try{ stopAudioOnly(prefix); }catch(e){} } else { try{ stopCombined(prefix); }catch(e){} }
+    resetRecUI(prefix);
+    const ta=document.getElementById("combTranscript-"+prefix);
+    const hasText=!!(ta&&ta.value);
+    const hasAudio=!!(audioOnly[prefix]&&audioOnly[prefix].blobUrl);
+    const row=document.getElementById("recSaveRow-"+prefix);
+    if(row)row.style.display=(hasText||hasAudio)?"flex":"none";
+    const sv=document.getElementById("recSave-"+prefix);
+    if(sv)sv.textContent=(mode==="audio")?"오디오 저장하기":"변환텍스트 저장하기";
+    return;
+  }
+  const mode=recMode[prefix]||"convert";
+  recMode[prefix]=mode;
+  recLast[prefix]=mode;
+  const tg=document.getElementById("recToggle-"+prefix); if(tg)tg.textContent="■ 녹음 정지";
+  const mc=document.getElementById("modeConvert-"+prefix); if(mc)mc.disabled=true;
+  const ma=document.getElementById("modeAudio-"+prefix); if(ma)ma.disabled=true;
+  const row=document.getElementById("recSaveRow-"+prefix); if(row)row.style.display="none";
+  if(mode==="audio"){ startAudioOnly(prefix); } else { startCombined(prefix); }
+}
+function saveRecord(prefix){
+  const mode=recLast[prefix]||recMode[prefix]||"convert";
+  if(mode==="audio"){ downloadAudioOnly(prefix); } else { downloadCombinedTranscript(prefix); }
 }
 async function startAudioOnly(prefix){
   const st=document.getElementById("combStatus-"+prefix);
