@@ -1171,7 +1171,8 @@ function renderCombinedArea(prefix, stepNum){
     area.innerHTML='<p class="note">이 브라우저는 녹음·음성 인식을 지원하지 않습니다. 최신 크롬·엣지에서 이용해 주세요.</p>'; return;
   }
   const fileWarn=(window.location.protocol==="file:")?'<div class="note" style="border-left-color:#c1272d;background:#fdecea"><b>지금 파일로 열려 있어 마이크·변환이 안 될 수 있습니다.</b> 마이크 설정이 켜져 있어도, 파일 주소에서는 크롬이 마이크를 막습니다. 웹사이트 주소(https)로 열어야 녹음·변환이 됩니다.</div>':'';
-  area.innerHTML=fileWarn+'<p style="font-size:14px;margin-bottom:8px"><b>녹음하기 ('+code+')</b> — 녹음하면 바로 텍스트로 변환됩니다. 변환 시 음성이 음성 인식 업체 서버로 보내질 수 있어, 버튼을 눌렀을 때만 변환합니다. 정확도는 완벽하지 않으니 이름·숫자는 직접 확인하고 고치세요. 다운로드는 변환텍스트만 됩니다. Muse 파일 미리보기나 카톡 내 브라우저에서는 마이크가 막혀 녹음이 안 될 수 있습니다. 그럴 때는 크롬 브라우저에서 파일을 직접 열어주세요.</p>'
+  const transWarn=(!hasTrans)?'<div class="note" style="border-left-color:#c1272d;background:#fdecea"><b>이 브라우저에서는 음성 변환이 안 됩니다.</b> 녹음(오디오)은 되지만 글로 변환은 안 됩니다. 변환을 쓰려면 크롬 브라우저에서 웹사이트 주소(https://daesimbang.vercel.app)로 열어주세요.</div>':'';
+  area.innerHTML=fileWarn+transWarn+'<p style="font-size:14px;margin-bottom:8px"><b>녹음하기 ('+code+')</b> — 녹음하면 바로 텍스트로 변환됩니다. 변환 시 음성이 음성 인식 업체 서버로 보내질 수 있어, 버튼을 눌렀을 때만 변환합니다. 정확도는 완벽하지 않으니 이름·숫자는 직접 확인하고 고치세요. 다운로드는 변환텍스트만 됩니다. 카톡 안 브라우저나 삼성 인터넷에서는 음성 변환이 안 될 수 있습니다. 그럴 때는 크롬 브라우저에서 웹사이트 주소로 직접 열어주세요.</p>'
   +'<div class="btnrow"><button id="combStart-'+prefix+'" onclick="startCombined(\''+prefix+'\')">녹음하기</button><button id="combStop-'+prefix+'" onclick="stopCombined(\''+prefix+'\')" disabled>녹음 정지</button><button class="danger" onclick="deleteCombined(\''+prefix+'\')">녹음 삭제</button><span id="combTime-'+prefix+'" style="font-weight:800;align-self:center">00:00</span></div>'
   +'<div id="combStatus-'+prefix+'" class="saved"></div>'
   +'<div id="combResult-'+prefix+'" style="display:none;margin-top:10px"><audio id="combAudio-'+prefix+'" controls style="width:100%"></audio></div>'
@@ -1188,24 +1189,6 @@ async function startCombined(prefix){
   comb[prefix]=s;
   if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){
     if(st)st.textContent="이 화면에서는 마이크를 쓸 수 없습니다. 크롬 브라우저에서 파일을 직접 열어주세요. Muse 파일 미리보기에서는 마이크 권한이 안 될 수 있습니다.";
-  }
-  if(typeof MediaRecorder!=="undefined"&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
-    try{
-      s.stream=await navigator.mediaDevices.getUserMedia({audio:true});
-      s.recorder=new MediaRecorder(s.stream);
-      s.recorder.ondataavailable=function(ev){if(ev.data&&ev.data.size)s.chunks.push(ev.data);};
-      s.recorder.onstop=function(){
-        const blob=new Blob(s.chunks,{type:s.recorder.mimeType||"audio/webm"});
-        if(s.blobUrl)URL.revokeObjectURL(s.blobUrl);
-        s.blobUrl=URL.createObjectURL(blob);
-        const audio=document.getElementById("combAudio-"+prefix); if(audio)audio.src=s.blobUrl;
-        if(res)res.style.display="block";
-        if(s.stream){s.stream.getTracks().forEach(function(tr){tr.stop();}); s.stream=null;}
-      };
-      s.recorder.start(); s.recOk=true;
-    }catch(e){
-      if(st)st.textContent="마이크 권한이 거부되었습니다. 브라우저 설정에서 마이크 권한을 허용한 뒤 다시 시도해 주세요. 크롬 브라우저에서 파일을 직접 열어보세요.";
-    }
   }
   if(window.SpeechRecognition||window.webkitSpeechRecognition){
     try{
@@ -1225,6 +1208,7 @@ async function startCombined(prefix){
         if(st&&(ev.error==="not-allowed"||ev.error==="service-not-allowed"))st.textContent="음성 변환이 안 됩니다. 마이크 권한이 거부되었습니다. 파일로 열었으면 웹사이트 주소(https)로 열어야 합니다. 크롬 설정에서 마이크를 허용한 뒤 다시 시도해 주세요.";
         if(st&&ev.error==="network")st.textContent="음성 변환이 안 됩니다. 음성 인식 서버에 연결되지 않았습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.";
         if(st&&ev.error==="audio-capture")st.textContent="음성 변환이 안 됩니다. 마이크에서 소리를 받지 못했습니다. 마이크가 연결되어 있는지 확인해 주세요.";
+        if(st&&ev.error!=="not-allowed"&&ev.error!=="service-not-allowed"&&ev.error!=="network"&&ev.error!=="audio-capture")st.textContent="음성 변환 오류가 났습니다 ("+ev.error+"). 크롬 브라우저에서 다시 시도해 주세요.";
       };
       recog.onend=function(){
         if(s.active&&!s.transFatal){
@@ -1233,6 +1217,24 @@ async function startCombined(prefix){
       };
       recog.start(); s.transOk=true;
     }catch(e){}
+  }
+  if(typeof MediaRecorder!=="undefined"&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
+    try{
+      s.stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      s.recorder=new MediaRecorder(s.stream);
+      s.recorder.ondataavailable=function(ev){if(ev.data&&ev.data.size)s.chunks.push(ev.data);};
+      s.recorder.onstop=function(){
+        const blob=new Blob(s.chunks,{type:s.recorder.mimeType||"audio/webm"});
+        if(s.blobUrl)URL.revokeObjectURL(s.blobUrl);
+        s.blobUrl=URL.createObjectURL(blob);
+        const audio=document.getElementById("combAudio-"+prefix); if(audio)audio.src=s.blobUrl;
+        if(res)res.style.display="block";
+        if(s.stream){s.stream.getTracks().forEach(function(tr){tr.stop();}); s.stream=null;}
+      };
+      s.recorder.start(); s.recOk=true;
+    }catch(e){
+      if(st)st.textContent="마이크 권한이 거부되었습니다. 브라우저 설정에서 마이크 권한을 허용한 뒤 다시 시도해 주세요. 크롬 브라우저에서 파일을 직접 열어보세요.";
+    }
   }
   const startTs=Date.now();
   s.timer=setInterval(function(){const el=document.getElementById("combTime-"+prefix); if(el)el.textContent=fmtTime(Math.floor((Date.now()-startTs)/1000));},500);
@@ -1244,7 +1246,7 @@ async function startCombined(prefix){
   }
   const bs=document.getElementById("combStart-"+prefix); if(bs)bs.disabled=true;
   const be=document.getElementById("combStop-"+prefix); if(be)be.disabled=false;
-  if(st)st.textContent=s.recOk?"녹음·변환 중입니다. 말씀하시면 실시간으로 글로 표시됩니다.":"녹음(오디오)은 안 되지만, 변환은 진행 중입니다. 말씀하시면 실시간으로 글로 표시됩니다.";
+  if(st)st.textContent=(s.recOk&&s.transOk)?"녹음·변환 중입니다. 말씀하시면 실시간으로 글로 표시됩니다.":(s.recOk?"녹음은 되고 있지만, 음성 변환이 시작되지 않았습니다. 이 브라우저에서는 변환이 안 될 수 있습니다. 크롬에서 열어주세요.":"녹음(오디오)은 안 되지만, 변환은 진행 중입니다. 말씀하시면 실시간으로 글로 표시됩니다.");
 }
 function stopCombined(prefix, silent){
   const s=comb[prefix]; if(!s)return;
@@ -1255,7 +1257,7 @@ function stopCombined(prefix, silent){
   const ta=document.getElementById("combTranscript-"+prefix);
   if(ta){ta.value=s.final||ta.value; saveVisitField("transcript"+prefix, ta.value);}
   const st=document.getElementById("combStatus-"+prefix);
-  if(st&&!silent)st.textContent=(!ta||!ta.value)?"변환된 텍스트가 없습니다. 마이크 권한과 인터넷 연결을 확인하고, 웹사이트 주소(https)로 열어 다시 녹음해 주세요.":"녹음·변환이 끝났습니다. 텍스트를 직접 고친 뒤 다운로드하거나, 전체 내용 다운로드(11번)로 저장하세요.";
+  if(st&&!silent)st.textContent=(!ta||!ta.value)?"변환된 텍스트가 없습니다. 음성 변환은 크롬에서만 됩니다. 삼성 인터넷·카톡 안에서는 녹음은 돼도 변환이 안 될 수 있습니다. 크롬에서 웹사이트 주소로 열어 다시 녹음해 주세요.":"녹음·변환이 끝났습니다. 텍스트를 직접 고친 뒤 다운로드하거나, 전체 내용 다운로드(11번)로 저장하세요.";
   const bs=document.getElementById("combStart-"+prefix); if(bs)bs.disabled=false;
   const be=document.getElementById("combStop-"+prefix); if(be)be.disabled=true;
 }
